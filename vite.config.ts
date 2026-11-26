@@ -31,6 +31,12 @@ const pageRule: NitroConfig['routeRules'] = {
   node: { '/**': { swr: PAGE_TTL }, '/api/**': { cache: false } },
 }[host];
 
+// Analog's Nitro plugin gives every route rule a `headers` object, and Vercel
+// rejects an empty one. `ssr: true` (the default) makes Analog stamp a header.
+function withSsr(rules: NitroConfig['routeRules'] = {}) {
+  return Object.fromEntries(Object.entries(rules).map(([path, rule]) => [path, { ...rule, ssr: true }]));
+}
+
 // Storage behind Nitro's cache (cached catalog queries and SWR pages).
 const cacheStorage = {
   vercel: { driver: 'vercel-runtime-cache' },
@@ -56,7 +62,7 @@ export default defineConfig(() => ({
       alias: { '@': src },
       future: { nativeSWR: true },
       storage: { cache: cacheStorage },
-      routeRules: { ...pageRule, '/assets/**': { headers: immutable } },
+      routeRules: { ...withSsr(pageRule), '/assets/**': { headers: immutable } },
     }),
     tailwindcss(),
   ],
