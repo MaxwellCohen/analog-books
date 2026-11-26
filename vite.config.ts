@@ -21,14 +21,16 @@ const host = process.env['VERCEL']
 const PAGE_TTL = 3600;
 const QUERY_KEYS = ['search', 'page', 'year', 'rating', 'pages', 'language', 'list', 'delay'];
 const immutable = { 'cache-control': 'public, max-age=31536000, immutable' };
+// Cached pages link to hashed assets, so each build gets its own page-cache group.
+const swrPages = { cache: { swr: true, maxAge: PAGE_TTL, group: `pages-${Date.now()}` } };
 
 // Page caching through Nitro route rules: Vercel ISR, Netlify durable CDN cache,
 // and Nitro's own SWR response cache (in KV) on Cloudflare and Node.
 const pageRule: NitroConfig['routeRules'] = {
   vercel: { '/**': { isr: { expiration: PAGE_TTL, allowQuery: QUERY_KEYS } }, '/api/**': { isr: false } },
   netlify: { '/**': { isr: PAGE_TTL }, '/api/**': { isr: false } },
-  cloudflare: { '/**': { swr: PAGE_TTL }, '/api/**': { cache: false } },
-  node: { '/**': { swr: PAGE_TTL }, '/api/**': { cache: false } },
+  cloudflare: { '/**': swrPages, '/api/**': { cache: false } },
+  node: { '/**': swrPages, '/api/**': { cache: false } },
 }[host];
 
 // Analog's Nitro plugin gives every route rule a `headers` object, and Vercel
