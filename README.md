@@ -29,11 +29,13 @@ pnpm typecheck
 
 The build picks the Nitro preset from the host: Vercel (`VERCEL=1`) and Netlify (`NETLIFY=1`) are detected from their build environment, and Cloudflare Workers uses `BUILD_PRESET=cloudflare-module`. With none of them it builds a Node server.
 
-| Host | Config |
-| --- | --- |
-| Vercel | `vercel.json` (Build Output API in `.vercel/output`) |
-| Netlify | `netlify.toml` (publish `dist/analog/public`, function in `dist/analog/server`) |
-| Cloudflare Workers | `wrangler.jsonc` (`pnpm deploy:cloudflare`) |
+| Host | URL | Config |
+| --- | --- | --- |
+| Vercel | https://analog-books.vercel.app | `vercel.json` (Build Output API in `.vercel/output`) |
+| Netlify | https://analog-books.netlify.app | `netlify.toml` (publish `dist/analog/public`, function in `dist/analog/server`) |
+| Cloudflare Workers | https://analog-books.to-email-max.workers.dev | `wrangler.jsonc` |
+
+- Vercel is connected to this repo: a push to `main` builds and deploys. Netlify and Cloudflare are deployed with `pnpm deploy:netlify` and `pnpm deploy:cloudflare`.
 
 `POSTGRES_URL` is set on every host (Vercel and Netlify environment variable, Cloudflare secret).
 
