@@ -16,3 +16,7 @@ Changes on the `optimized` branch compared with `main`. Each one is marked **fra
 - **Prerendering**: Analog prerenders `/` by default, but both branches turn it off (`prerender.routes: []`). The catalog is driven by query params, and a static `/` would be served for every `/?search=...` URL. ISR (item 1) caches each query combination instead.
 - **Streaming SSR** (`experimental.streaming` with `renderStream`): Analog sends streamed documents with `Cache-Control: no-store`, which would turn off the page caching in item 1. Every route also waits on its data resolver before rendering, so streaming would only flush the `<head>` early.
 - **Critical CSS inlining**: the Angular CLI inlines critical CSS, but Analog's Vite build has no equivalent. The single 41 kB stylesheet stays render-blocking.
+
+## Workaround
+
+- `withSsr()` in `vite.config.ts` (hand-written) adds `ssr: true`, which is already the default, to the page and API route rules. Analog's Nitro plugin gives every route rule a `headers` object, and Vercel rejects the build output when that object is empty. With `ssr: true`, Analog stamps an `x-analog-no-ssr: false` header on the rule, so the object is no longer empty.
