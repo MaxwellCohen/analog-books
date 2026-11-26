@@ -1,0 +1,7 @@
+[build]
+  command = "pnpm build"
+  publish = "dist/analog/public"
+  functions = "dist/analog"
+
+[build.environment]
+  NODE_VERSION = "24"
