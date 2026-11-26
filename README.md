@@ -36,3 +36,15 @@ The build picks the Nitro preset from the host: Vercel (`VERCEL=1`) and Netlify 
 | Cloudflare Workers | `wrangler.jsonc` (`pnpm deploy:cloudflare`) |
 
 `POSTGRES_URL` is set on every host (Vercel and Netlify environment variable, Cloudflare secret).
+
+### Optimized branch
+
+The `optimized` branch is deployed separately (production branch `optimized`):
+
+| Host | URL |
+| --- | --- |
+| Vercel | https://analog-books-optimized.vercel.app |
+| Netlify | https://analog-books-max-optimized.netlify.app |
+| Cloudflare Workers | https://analog-books-optimized.to-email-max.workers.dev |
+
+See [OPTIMIZATIONS.md](OPTIMIZATIONS.md) for each change and whether it is a framework feature or hand-written.

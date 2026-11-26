@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "analog-books",
+  "name": "analog-books-optimized",
   "main": "dist/analog/server/index.mjs",
   "compatibility_date": "2026-04-06",
   "compatibility_flags": ["nodejs_compat"],
-  "assets": { "directory": "dist/analog/public", "binding": "ASSETS" }
+  "assets": { "directory": "dist/analog/public", "binding": "ASSETS" },
+  "kv_namespaces": [{ "binding": "CATALOG_CACHE", "id": "b36ded9fc45446379b6b87578cd38b74" }]
 }

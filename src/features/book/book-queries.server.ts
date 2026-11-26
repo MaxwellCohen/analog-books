@@ -1,4 +1,5 @@
 import { and, count, eq, gte, isNull, lte, not, sql } from 'drizzle-orm'
+import { defineCachedFunction } from 'nitropack/runtime'
 import { EMPTY_IMAGE_URL, ITEMS_PER_PAGE, MIN_RATING, MIN_YEAR } from '@/features/book/book-constants'
 import { GENERATED_PREVIEW_BOOKS } from '@/features/book/book-preview-catalog'
 import type { BookDetails, BookSummary } from '@/features/book/book-types'
@@ -98,7 +99,7 @@ function getPreviewCount(filters: BookFilters): number {
   return filterPreview(filters).length
 }
 
-export async function getBooksPage(query: BookQuery): Promise<BookSummary[]> {
+async function loadBooksPage(query: BookQuery): Promise<BookSummary[]> {
   const database = getDb()
   if (!database) return getPreviewBooks(query)
 
@@ -116,7 +117,7 @@ export async function getBooksPage(query: BookQuery): Promise<BookSummary[]> {
     .offset((query.page - 1) * ITEMS_PER_PAGE)
 }
 
-export async function getBooksCount(filters: BookFilters): Promise<number> {
+async function loadBooksCount(filters: BookFilters): Promise<number> {
   const database = getDb()
   if (!database) return getPreviewCount(filters)
 
@@ -127,7 +128,7 @@ export async function getBooksCount(filters: BookFilters): Promise<number> {
   return total
 }
 
-export async function getBookById(id: string): Promise<BookDetails | null> {
+async function loadBookById(id: string): Promise<BookDetails | null> {
   const bookId = Number(id)
   if (!Number.isInteger(bookId)) return null
 
@@ -161,3 +162,17 @@ export async function getBookById(id: string): Promise<BookDetails | null> {
 
   return result[0] ?? null
 }
+
+/**
+ * Nitro cached functions: results are kept for an hour in the `cache` storage
+ * mount (Vercel runtime cache, Netlify Blobs or Cloudflare KV) and refreshed in
+ * the background once stale. The preview catalog is not cached.
+ */
+function cached<Args extends unknown[], Result>(name: string, load: (...args: Args) => Promise<Result>) {
+  const cachedLoad = defineCachedFunction(load, { name, maxAge: 3600, swr: true })
+  return (...args: Args): Promise<Result> => (getDb() ? cachedLoad(...args) : load(...args))
+}
+
+export const getBooksPage = cached('books-page', loadBooksPage)
+export const getBooksCount = cached('books-count', loadBooksCount)
+export const getBookById = cached('book-by-id', loadBookById)
